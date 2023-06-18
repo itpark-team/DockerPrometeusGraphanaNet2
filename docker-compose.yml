@@ -1,0 +1,37 @@
+version: "3"
+
+services:
+  nginx:
+    image: nginx
+    volumes:
+      - ./nginxapp:/etc/nginx/conf.d
+    ports:
+      - "80:80"
+
+  prometheus:
+    image: prom/prometheus:v2.35.0
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometeusapp:/etc/prometheus/
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yaml'
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana-oss:8.5.2
+    container_name: grafana
+    restart: unless-stopped
+    volumes:
+      - ./graphanaapp:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SERVER_DOMAIN=localhost
+    ports:
+      - "3000:3000"
+
+  app:
+    build: ./aspapp
+    depends_on:
+      - nginx
